@@ -133,8 +133,18 @@ public class CentralHub
     public void logSPFeedBack(int rating, int actualWaitTime, String SPId)
     {
         CHServiceProvider serviceProvider = serviceProviderMap.get(SPId);
+        //TODO: add code
         //serviceProvider.setTrustScore();
         //serviceProvider.setActualWaitTimeAverage();
 
+    }
+
+    /**
+     * Trust score of service requester
+     * */
+    public Integer getServiceRequesterTrustScore(String SPId)
+    {
+        //TODO: add code
+        return 0;
     }
 }
