@@ -1,5 +1,7 @@
 package actors;
 
+import java.util.List;
+
 /**
  * @author adeelahuma
  * */
@@ -8,6 +10,7 @@ public class CHServiceProvider extends ServiceProvider
 {
     private Double trustScore;
     private Integer actualWaitTimeAverage;
+    private List<SPVisitors> spVisitors;
 
     public Double getTrustScore() {
         return trustScore;
@@ -29,5 +32,13 @@ public class CHServiceProvider extends ServiceProvider
         super(id, name, waitTime);
         this.trustScore = trustScore;
         this.actualWaitTimeAverage = actualWaitTimeAverage;
+    }
+
+    public List<SPVisitors> getSpVisitors() {
+        return spVisitors;
+    }
+
+    public void setSpVisitors(List<SPVisitors> spVisitors) {
+        this.spVisitors = spVisitors;
     }
 }

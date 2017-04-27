@@ -10,6 +10,10 @@ import java.util.*;
 public class CentralHub
 {
     public static final Double initialTrustScore = 0.5;
+    public static final Double waitTimeThreshold = 5.0; // 5 minutes
+    public static final Double repScoreThreshold = 0.8;
+    public static final Double trustDecayFactor = 0.1;
+
     Utility util = new Utility();
 
     //key = serviceProviderId

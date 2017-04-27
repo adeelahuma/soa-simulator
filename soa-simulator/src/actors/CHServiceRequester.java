@@ -7,6 +7,7 @@ package actors;
 public class CHServiceRequester extends ServiceRequester
 {
     private Double trustScore;
+    private Double reputationScore;
 
     public CHServiceRequester(String serviceRequesterId, String serviceRequesterName, Double trustScore) {
         super(serviceRequesterId, serviceRequesterName);
