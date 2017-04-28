@@ -83,7 +83,12 @@ public class CentralHub
         CHServiceRequester sr22 = new CHServiceRequester(util.getId(),"JJ", initialTrustScore);
         CHServiceRequester sr23 = new CHServiceRequester(util.getId(),"CC", initialTrustScore);
         CHServiceRequester sr24 = new CHServiceRequester(util.getId(),"AH", initialTrustScore);
-        CHServiceRequester sr25 = new CHServiceRequester(util.getId(),"TC", initialTrustScore);
+        CHServiceRequester sr25 = new CHServiceRequester(util.getId(),"BS", initialTrustScore);
+        CHServiceRequester sr26 = new CHServiceRequester(util.getId(),"MS", initialTrustScore);
+        CHServiceRequester sr27 = new CHServiceRequester(util.getId(),"KK", initialTrustScore);
+        CHServiceRequester sr28 = new CHServiceRequester(util.getId(),"LL", initialTrustScore);
+        CHServiceRequester sr29 = new CHServiceRequester(util.getId(),"HH", initialTrustScore);
+        CHServiceRequester sr30 = new CHServiceRequester(util.getId(),"HM", initialTrustScore);
 
         serviceRequesterMap.put(sr1.getId(), sr1);
         serviceRequesterMap.put(sr2.getId(), sr2);
@@ -101,6 +106,20 @@ public class CentralHub
         serviceRequesterMap.put(sr14.getId(), sr14);
         serviceRequesterMap.put(sr15.getId(), sr15);
         serviceRequesterMap.put(sr16.getId(), sr16);
+        serviceRequesterMap.put(sr17.getId(), sr17);
+        serviceRequesterMap.put(sr18.getId(), sr18);
+        serviceRequesterMap.put(sr19.getId(), sr19);
+        serviceRequesterMap.put(sr20.getId(), sr20);
+        serviceRequesterMap.put(sr21.getId(), sr21);
+        serviceRequesterMap.put(sr22.getId(), sr22);
+        serviceRequesterMap.put(sr23.getId(), sr23);
+        serviceRequesterMap.put(sr24.getId(), sr24);
+        serviceRequesterMap.put(sr25.getId(), sr25);
+        serviceRequesterMap.put(sr26.getId(), sr26);
+        serviceRequesterMap.put(sr27.getId(), sr27);
+        serviceRequesterMap.put(sr28.getId(), sr28);
+        serviceRequesterMap.put(sr29.getId(), sr29);
+        serviceRequesterMap.put(sr30.getId(), sr30);
 
     }
 
