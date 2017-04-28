@@ -1,6 +1,6 @@
+import actors.CHServiceProvider;
+import actors.CHServiceRequester;
 import actors.CentralHub;
-import actors.ServiceProvider;
-import actors.ServiceRequester;
 import util.Utility;
 
 import java.util.List;
@@ -45,19 +45,19 @@ import java.util.Set;
 
         //TODO: Run 100 times for each SR
 
-        for(ServiceRequester serviceRequester :centralHub.serviceRequesterMap.values())
+        for(CHServiceRequester serviceRequester :centralHub.serviceRequesterMap.values())
         {
             /**
              * Step-1: Query central hub service providers with a waitTime=x
              * */
             Integer requestedWaitTime = 5; //FIXME: change it randomly
-            List<ServiceProvider> serviceProviders =  centralHub.queryServiceProvider(requestedWaitTime);
+            List<CHServiceProvider> serviceProviders =  centralHub.queryServiceProvider(requestedWaitTime);
 
             /**
              * Step-2:
              * */
             int spIndex = util.pickRandomIndex(serviceProviders.size());
-            ServiceProvider servingSP = serviceProviders.get(spIndex);
+            CHServiceProvider servingSP = serviceProviders.get(spIndex);
 
             /**
              * Step-3:
@@ -75,11 +75,19 @@ import java.util.Set;
                 feedback =1;
             }
 
-            /**
-             * Step-4:
-             * */
-            centralHub.logSPFeedBack(feedback, actualWaitTime, servingSP.getId());
 
+            /**
+             * Step-4: If Service requester is trust-worthy log the feedback about service provider
+             * and service requesters
+             * */
+            if(serviceRequester.getTrustScore() >= CentralHub.repScoreThreshold)
+            {
+                 //log feedback about SP
+                 centralHub.logSPFeedBack(feedback, actualWaitTime, servingSP);
+                //log feedback about SR
+                centralHub.logSRFeedBack(feedback, servingSP.getSpVisitors(), actualWaitTime);
+
+            }
         }
 
 

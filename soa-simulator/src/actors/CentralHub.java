@@ -117,9 +117,9 @@ public class CentralHub
     /**
      * get a service provider that matches given waitTime
      * */
-    public List<ServiceProvider> queryServiceProvider(Integer waitTime)
+    public List<CHServiceProvider> queryServiceProvider(Integer waitTime)
     {
-        List<ServiceProvider> serviceProviders = new ArrayList<ServiceProvider>();
+        List<CHServiceProvider> serviceProviders = new ArrayList<CHServiceProvider>();
 
         for(CHServiceProvider serviceProvider: serviceProviderMap.values())
         {
@@ -134,12 +134,45 @@ public class CentralHub
     /**
      * Service requester gives feedback about service providers  (+1= positive, -1= negative)
      * */
-    public void logSPFeedBack(int rating, int actualWaitTime, String SPId)
+    public void logSPFeedBack(int rating, int actualWaitTime, CHServiceProvider serviceProvider)
     {
-        CHServiceProvider serviceProvider = serviceProviderMap.get(SPId);
-        //TODO: add code
-        //serviceProvider.setTrustScore();
-        //serviceProvider.setActualWaitTimeAverage();
+        Double spTrustScore = serviceProvider.getTrustScore();
+
+        //calculate trust score of service providers
+        if(Math.abs(serviceProvider.getWaitTime() - actualWaitTime) > waitTimeThreshold) // SP not trustworthy
+        {
+
+        }
+        else//trustworthy
+        {
+
+        }
+
+        //save feedback about other SPs
+        serviceProvider.setTrustScore(spTrustScore);
+        serviceProvider.setActualWaitTimeAverage((actualWaitTime+serviceProvider.getWaitTime())/2);
+    }
+
+    /**
+     *
+     * */
+    public void logSRFeedBack(int rating, List<SPVisitors> spVisitors, int actualWaitTime)
+    {
+        for(SPVisitors sp : spVisitors)
+        {
+            if((sp.getWaitTimeLogged() - actualWaitTime) < waitTimeThreshold ) //trustworthy
+            {
+                updateSRTrustScore(1,serviceRequesterMap.get(sp.getSRId()));
+            }
+            else
+            {
+                updateSRTrustScore(-1,serviceRequesterMap.get(sp.getSRId()));
+            }
+        }
+    }
+
+    public void updateSRTrustScore(int rating, CHServiceRequester sr)
+    {
 
     }
 
@@ -151,4 +184,6 @@ public class CentralHub
         //TODO: add code
         return 0;
     }
+
+
 }
