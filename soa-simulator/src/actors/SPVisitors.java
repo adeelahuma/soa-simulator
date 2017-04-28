@@ -6,7 +6,7 @@ package actors;
 public class SPVisitors
 {
     private String SRId;
-    private Double waitTimeLogged;
+    private Integer waitTimeLogged;
 
     public String getSRId() {
         return SRId;
@@ -16,11 +16,16 @@ public class SPVisitors
         this.SRId = SRId;
     }
 
-    public Double getWaitTimeLogged() {
+    public Integer getWaitTimeLogged() {
         return waitTimeLogged;
     }
 
-    public void setWaitTimeLogged(Double waitTimeLogged) {
+    public void setWaitTimeLogged(Integer waitTimeLogged) {
+        this.waitTimeLogged = waitTimeLogged;
+    }
+
+    public SPVisitors(String SRId, Integer waitTimeLogged) {
+        this.SRId = SRId;
         this.waitTimeLogged = waitTimeLogged;
     }
 }

@@ -1,5 +1,6 @@
 package actors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ public class CHServiceProvider extends ServiceProvider
 {
     private Double trustScore;
     private Integer actualWaitTimeAverage;
-    private List<SPVisitors> spVisitors;
+    private List<SPVisitors> spVisitors = new ArrayList<SPVisitors>();
     private Double alpha = 1.0 ;          //Number of positive feedback
     private Double beta = 1.0;          //Number of negative feedback
 
@@ -62,6 +63,7 @@ public class CHServiceProvider extends ServiceProvider
 
     public Double calculateTrustScore()
     {
-        return alpha / (alpha+beta);
+        this.trustScore = alpha / (alpha+beta);;
+        return trustScore;
     }
 }

@@ -14,6 +14,10 @@ public class CentralHub
     public static final Double repScoreThreshold = 0.5; //reputation score of SR
     public static final Double trustDecayFactor = 0.1;
 
+    //added to normalize reputation score between 0 and 1
+    private Double maxReputationScore= 1.0;
+    private Double minReputationScore= 0.0;
+
     Utility util = new Utility();
 
     //key = serviceProviderId
@@ -32,12 +36,12 @@ public class CentralHub
     {
         CHServiceProvider sp1 = new CHServiceProvider(util.getId(), "BurgerKing", 5,initialTrustScore, null);
         CHServiceProvider sp2 = new CHServiceProvider(util.getId(), "Burger7", 5, initialTrustScore, null);
-        CHServiceProvider sp3 = new CHServiceProvider(util.getId(), "Burger21", 5, initialTrustScore, null);
-        CHServiceProvider sp4 = new CHServiceProvider(util.getId(), "KFC", 5, initialTrustScore, null);
-        CHServiceProvider sp5 = new CHServiceProvider(util.getId(), "Chick-fill-A", 5, initialTrustScore, null);
+        CHServiceProvider sp3 = new CHServiceProvider(util.getId(), "Burger21", 10, initialTrustScore, null);
+        CHServiceProvider sp4 = new CHServiceProvider(util.getId(), "KFC", 10, initialTrustScore, null);
+        CHServiceProvider sp5 = new CHServiceProvider(util.getId(), "Chick-fill-A", 10, initialTrustScore, null);
         CHServiceProvider sp6 = new CHServiceProvider(util.getId(), "Panera", 5, initialTrustScore, null);
         CHServiceProvider sp7 = new CHServiceProvider(util.getId(), "Sweetgreen", 5, initialTrustScore, null);
-        CHServiceProvider sp8 = new CHServiceProvider(util.getId(), "BasilLeaf", 5, initialTrustScore, null);
+        CHServiceProvider sp8 = new CHServiceProvider(util.getId(), "BasilLeaf", 10, initialTrustScore, null);
         CHServiceProvider sp9 = new CHServiceProvider(util.getId(), "Busara", 5, initialTrustScore, null);
         CHServiceProvider sp10 = new CHServiceProvider(util.getId(), "MidTown Kabob", 5, initialTrustScore, null);
 
@@ -164,22 +168,9 @@ public class CentralHub
     /**
      * Service requester gives feedback about service providers  (+1= positive, -1= negative)
      * */
-    public void logSPFeedBack(int rating, int actualWaitTime, CHServiceProvider serviceProvider)
+    public void logSPFeedBack(int rating, Integer actualWaitTime, CHServiceProvider serviceProvider)
     {
-        Double spTrustScore = serviceProvider.getTrustScore();
-
-        //calculate trust score of service providers
-        if(Math.abs(serviceProvider.getWaitTime() - actualWaitTime) > waitTimeThreshold) // SP not trustworthy
-        {
-
-        }
-        else//trustworthy
-        {
-
-        }
-
-        //save feedback about other SPs
-        serviceProvider.setTrustScore(spTrustScore);
+        serviceProvider.calculateTrustScore();
         serviceProvider.setActualWaitTimeAverage((actualWaitTime+serviceProvider.getWaitTime())/2);
     }
 
@@ -201,19 +192,47 @@ public class CentralHub
         }
     }
 
+    /**
+     * Increment or decrement reputation rating
+     * */
     public void updateSRTrustScore(int rating, CHServiceRequester sr)
     {
+        Double tempRepScore = sr.getReputationScore()+rating;
 
+        sr.setReputationScore(normalizeRepScore(tempRepScore));
     }
 
     /**
      * Trust score of service requester
      * */
-    public Integer getServiceRequesterTrustScore(String SPId)
+    public Boolean isServiceRequesterTrustWorthy(String SPId)
     {
-        //TODO: add code
-        return 0;
+        Boolean trustWorthy = false;
+
+        if(serviceRequesterMap.get(SPId).getReputationScore() >= repScoreThreshold)
+        {
+            trustWorthy = true;
+        }
+
+        return trustWorthy;
     }
 
+    /**
+     * Normalize reputation score
+     * */
+    private Double normalizeRepScore(Double repS)
+    {
+        if(repS > maxReputationScore)
+        {
+            maxReputationScore = repS;
+        }
+
+        if (repS < minReputationScore)
+        {
+            minReputationScore = repS;
+        }
+
+        return   ( (repS - minReputationScore) / (maxReputationScore - minReputationScore));
+    }
 
 }

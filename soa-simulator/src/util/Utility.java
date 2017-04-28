@@ -18,4 +18,12 @@ public class Utility
     {
         return new Random().nextInt(length);
     }
+
+    /**
+     * Randomly pick wait time 5 or 10
+     * */
+    public Integer pickRandomWaitTime()
+    {
+        return new Random().nextBoolean() ? 5: 10;
+    }
 }

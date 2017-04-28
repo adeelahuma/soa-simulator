@@ -1,6 +1,7 @@
 import actors.CHServiceProvider;
 import actors.CHServiceRequester;
 import actors.CentralHub;
+import actors.SPVisitors;
 import util.Utility;
 
 import java.util.List;
@@ -17,11 +18,10 @@ import java.util.Set;
 
     public static void main(String[] args)
     {
-        System.out.println("Starting Simulation...");
+        System.out.println("Starting trust based Simulation...");
 
         //TODO: Run 100 times for each SR
 
-        Integer requestedWaitTime = 5;
 
         /**
          * Simulation runs for all SR
@@ -33,10 +33,12 @@ import java.util.Set;
          *      *picking x malicious SP randomly
          *      #picking y malicious SR randomly
          *  For all SR do following:
-         *  Step 1: SR queries SP based on "waitTime" criteria
-         *  Step 2: SR picks SR based on highest score
-         *  Step 3: If malicious node fake waitTime
-         *  Step 4: log feedback about SP, other SR's if evaluating SR is trustworthy else ignore
+         *  Step 1: Randomly pick wait time
+         *  Step 2: SR queries SP based on "waitTime" criteria
+         *  Step 3: SR picks SR based on highest trust score
+         *  Step 4: If malicious SP fake waitTime
+         *  Step 5: If malicious SR collude feedback ( reverse feedback and log wrong waitTime)
+         *  Step 6: log feedback about SP, other SR's if evaluating SR is trustworthy else ignore
          * */
 
         System.out.println("Creating Service Providers...");
@@ -51,68 +53,104 @@ import java.util.Set;
         System.out.println("Tagging Service Requesters as malicious...");
         Set<String> maliciousSR = centralHub.pickMaliciousSR(5);
 
-
-        for(CHServiceRequester serviceRequester :centralHub.serviceRequesterMap.values())
+        /**
+         * Run Simulation x times
+         * */
+        for(int i = 0; i < 10 ; i++)
         {
-            /**
-             * Step-1: Query central hub service providers with a waitTime=x
-             * */
-            List<CHServiceProvider> serviceProviders =  centralHub.queryServiceProvider(requestedWaitTime);
-
-            /**
-             * Step-2:
-             * */
-            //Picking SP based on highest TS
-            Double tempSpTrustSCore = 0.0;
-            CHServiceProvider pickedSP = null;
-            for(CHServiceProvider sp : serviceProviders)
+            for(CHServiceRequester serviceRequester :centralHub.serviceRequesterMap.values())
             {
-                if(sp.getTrustScore()> tempSpTrustSCore)
+
+                Integer requestedWaitTime = util.pickRandomWaitTime();
+                /**
+                 * Query central hub service providers with a waitTime=x
+                 * */
+                List<CHServiceProvider> serviceProviders =  centralHub.queryServiceProvider(requestedWaitTime);
+
+                /**
+                 * Picking SP based on highest TS
+                 * */
+
+                Double tempSpTrustSCore = 0.0;
+                CHServiceProvider pickedSP = null;
+                for(CHServiceProvider sp : serviceProviders)
                 {
-                    tempSpTrustSCore = sp.getTrustScore();
-                    pickedSP = sp;
+                    if(sp.getTrustScore()> tempSpTrustSCore)
+                    {
+                        tempSpTrustSCore = sp.getTrustScore();
+                        pickedSP = sp;
 
+                    }
                 }
-            }
-            CHServiceProvider servingSP = pickedSP;
+                CHServiceProvider servingSP = pickedSP;
 
-            //Picking SP randomly
+                //Picking SP randomly
             /*int spIndex = util.pickRandomIndex(serviceProviders.size());
             CHServiceProvider servingSP = serviceProviders.get(spIndex);*/
 
 
-            /**
-             * Step-3:
-             * */
-            int actualWaitTime = 0;
-            int feedback = 0;
-            if(maliciousSP.contains(servingSP.getId())) //serving SP is malicious
-            {
-                actualWaitTime = servingSP.getWaitTime()+10;
-                feedback= -1;
-            }
-            else
-            {
-                actualWaitTime = servingSP.getWaitTime()-1;
-                feedback = 1;
-            }
+                /**
+                 * fake waitTime for malicious node
+                 * */
+                Integer actualWaitTime = 0;
+                int feedback = 0;
+                if(maliciousSP.contains(servingSP.getId())) //serving SP is malicious
+                {
+                    actualWaitTime = servingSP.getWaitTime()+ 10;
+                    feedback= -1;
+                }
+                else
+                {
+                    actualWaitTime = servingSP.getWaitTime();//- 1;
+                    feedback = 1;
+                }
 
-            /**
-             * Step-4: If Service requester is trust-worthy log the feedback about service provider
-             * and service requester
-             * */
-            if(serviceRequester.getTrustScore() >= CentralHub.repScoreThreshold)
-            {
-                 //log feedback about SP
-                 centralHub.logSPFeedBack(feedback, actualWaitTime, servingSP);
-                //log feedback about SR
-                centralHub.logSRFeedBack(feedback, servingSP.getSpVisitors(), actualWaitTime);
+                /**
+                 *  For malicious SR collude information ( reverse feedback and log wrong waitTime)
+                 * */
+                if(maliciousSR.contains(serviceRequester.getId()))
+                {
+                    if(feedback == 1)
+                    {
+                        servingSP.setBeta(servingSP.getBeta()+ 1); // increment negative interaction
+                        actualWaitTime = servingSP.getWaitTime()+ 10;
+                    }
+                    else
+                    {
+                        servingSP.setAlpha(servingSP.getAlpha() + 1); // increment positive interaction
+                        actualWaitTime = servingSP.getWaitTime();
+                    }
 
+                }
+                else
+                {
+                    if(feedback == 1)
+                    {
+                        servingSP.setAlpha(servingSP.getAlpha() + 1); // increment positive interaction
+                    }
+                    else
+                    {
+                        servingSP.setBeta(servingSP.getBeta()+ 1); // increment negative interaction
+                    }
+                }
+
+                /**
+                 * If Service requester is trust-worthy log the feedback about service provider
+                 * and service requester
+                 * */
+                if(serviceRequester.getReputationScore() >= CentralHub.repScoreThreshold)
+                {
+                    //log feedback about SP
+                    centralHub.logSPFeedBack(feedback, actualWaitTime, servingSP);
+                    //log feedback about SR
+                    centralHub.logSRFeedBack(feedback, servingSP.getSpVisitors(), actualWaitTime);
+                }
+
+                servingSP.getSpVisitors().add(new SPVisitors(serviceRequester.getId(), actualWaitTime));
             }
         }
 
-
-         System.out.println("Ending Simulation...");
+         System.out.println("Ending trust based Simulation...");
 
     }
 
