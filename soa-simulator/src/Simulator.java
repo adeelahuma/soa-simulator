@@ -17,6 +17,26 @@ import java.util.Set;
 
     public static void main(String[] args)
     {
+        System.out.println("Starting Simulation...");
+
+        //TODO: Run 100 times for each SR
+
+        Integer requestedWaitTime = 5;
+
+        /**
+         * Simulation runs for all SR
+         *  *SP are restaurants
+         *  *SR are people
+         *  Pre-Simulation Step:
+         *      *creating SP
+         *      *creating SR
+         *      *picking x malicious nodes randomly
+         *  For all SR do following:
+         *  Step 1: SR queries SP based on "waitTime" criteria
+         *  Step 2: SR picks SR based on highest score
+         *  Step 3: If malicious node fake waitTime
+         *  Step 4: log feedback about SP, other SR's if evaluating SR is trustworthy else ignore
+         * */
 
         System.out.println("Creating Service Providers...");
         centralHub.createServiceProviders();
@@ -27,37 +47,35 @@ import java.util.Set;
         System.out.println("Tagging Service Providers as malicious...");
         Set<String> maliciousSP = centralHub.pickMaliciousSP(5);
 
-        System.out.println("Starting Simulation...");
-
-        /**
-         * Simulation step
-         *
-         * 1. for each service requester query central hub for service providers matching waitTime == x
-         * 2. service requester randomly picks a service provider
-         * 3. if (SP is malicious)respond after y = x+10 time else respond in y = x-1 time
-         * 4. SR depending on y give feedback to CH
-         * 5. CH adjust TS of SP
-         * 6.
-         * 7.
-         * 8.
-         * 9.
-         * */
-
-        //TODO: Run 100 times for each SR
 
         for(CHServiceRequester serviceRequester :centralHub.serviceRequesterMap.values())
         {
             /**
              * Step-1: Query central hub service providers with a waitTime=x
              * */
-            Integer requestedWaitTime = 5; //FIXME: change it randomly
             List<CHServiceProvider> serviceProviders =  centralHub.queryServiceProvider(requestedWaitTime);
 
             /**
              * Step-2:
              * */
-            int spIndex = util.pickRandomIndex(serviceProviders.size());
-            CHServiceProvider servingSP = serviceProviders.get(spIndex);
+            //Picking SP based on highest TS
+            Double tempSpTrustSCore = 0.0;
+            CHServiceProvider pickedSP = null;
+            for(CHServiceProvider sp : serviceProviders)
+            {
+                if(sp.getTrustScore()> tempSpTrustSCore)
+                {
+                    tempSpTrustSCore = sp.getTrustScore();
+                    pickedSP = sp;
+
+                }
+            }
+            CHServiceProvider servingSP = pickedSP;
+
+            //Picking SP randomly
+            /*int spIndex = util.pickRandomIndex(serviceProviders.size());
+            CHServiceProvider servingSP = serviceProviders.get(spIndex);*/
+
 
             /**
              * Step-3:
@@ -74,7 +92,6 @@ import java.util.Set;
                 actualWaitTime = servingSP.getWaitTime()-1;
                 feedback =1;
             }
-
 
             /**
              * Step-4: If Service requester is trust-worthy log the feedback about service provider
