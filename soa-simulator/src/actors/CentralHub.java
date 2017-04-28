@@ -11,7 +11,7 @@ public class CentralHub
 {
     public static final Double initialTrustScore = 0.5;
     public static final Double waitTimeThreshold = 5.0; // 5 minutes
-    public static final Double repScoreThreshold = 0.8;
+    public static final Double repScoreThreshold = 0.5; //reputation score of SR
     public static final Double trustDecayFactor = 0.1;
 
     Utility util = new Utility();
@@ -30,16 +30,16 @@ public class CentralHub
      * */
     public void createServiceProviders()
     {
-        CHServiceProvider sp1 = new CHServiceProvider(util.getId(), "BurgerKing", 10,initialTrustScore, null);
+        CHServiceProvider sp1 = new CHServiceProvider(util.getId(), "BurgerKing", 5,initialTrustScore, null);
         CHServiceProvider sp2 = new CHServiceProvider(util.getId(), "Burger7", 5, initialTrustScore, null);
         CHServiceProvider sp3 = new CHServiceProvider(util.getId(), "Burger21", 5, initialTrustScore, null);
         CHServiceProvider sp4 = new CHServiceProvider(util.getId(), "KFC", 5, initialTrustScore, null);
-        CHServiceProvider sp5 = new CHServiceProvider(util.getId(), "Chick-fill-A", 10, initialTrustScore, null);
-        CHServiceProvider sp6 = new CHServiceProvider(util.getId(), "Panera", 10, initialTrustScore, null);
-        CHServiceProvider sp7 = new CHServiceProvider(util.getId(), "Sweetgreen", 10, initialTrustScore, null);
-        CHServiceProvider sp8 = new CHServiceProvider(util.getId(), "BasilLeaf", 10, initialTrustScore, null);
-        CHServiceProvider sp9 = new CHServiceProvider(util.getId(), "Busara", 10, initialTrustScore, null);
-        CHServiceProvider sp10 = new CHServiceProvider(util.getId(), "MidTown Kabob", 10, initialTrustScore, null);
+        CHServiceProvider sp5 = new CHServiceProvider(util.getId(), "Chick-fill-A", 5, initialTrustScore, null);
+        CHServiceProvider sp6 = new CHServiceProvider(util.getId(), "Panera", 5, initialTrustScore, null);
+        CHServiceProvider sp7 = new CHServiceProvider(util.getId(), "Sweetgreen", 5, initialTrustScore, null);
+        CHServiceProvider sp8 = new CHServiceProvider(util.getId(), "BasilLeaf", 5, initialTrustScore, null);
+        CHServiceProvider sp9 = new CHServiceProvider(util.getId(), "Busara", 5, initialTrustScore, null);
+        CHServiceProvider sp10 = new CHServiceProvider(util.getId(), "MidTown Kabob", 5, initialTrustScore, null);
 
         serviceProviderMap.put(sp1.getId(), sp1);
         serviceProviderMap.put(sp2.getId(), sp2);
@@ -71,6 +71,15 @@ public class CentralHub
         CHServiceRequester sr14 = new CHServiceRequester(util.getId(),"Charming Charlie", initialTrustScore);
         CHServiceRequester sr15 = new CHServiceRequester(util.getId(),"Damon Salvatore", initialTrustScore);
         CHServiceRequester sr16 = new CHServiceRequester(util.getId(),"Elena Gilbert", initialTrustScore);
+        CHServiceRequester sr17 = new CHServiceRequester(util.getId(),"Elena Gilmore", initialTrustScore);
+        CHServiceRequester sr18 = new CHServiceRequester(util.getId(),"Morse Gilbert", initialTrustScore);
+        CHServiceRequester sr19 = new CHServiceRequester(util.getId(),"James Bond", initialTrustScore);
+        CHServiceRequester sr20 = new CHServiceRequester(util.getId(),"Johny Depp", initialTrustScore);
+        CHServiceRequester sr21 = new CHServiceRequester(util.getId(),"Jeff Moose", initialTrustScore);
+        CHServiceRequester sr22 = new CHServiceRequester(util.getId(),"JJ", initialTrustScore);
+        CHServiceRequester sr23 = new CHServiceRequester(util.getId(),"CC", initialTrustScore);
+        CHServiceRequester sr24 = new CHServiceRequester(util.getId(),"AH", initialTrustScore);
+        CHServiceRequester sr25 = new CHServiceRequester(util.getId(),"TC", initialTrustScore);
 
         serviceRequesterMap.put(sr1.getId(), sr1);
         serviceRequesterMap.put(sr2.getId(), sr2);
@@ -111,7 +120,28 @@ public class CentralHub
         }
 
         return maliciousSPIds;
+    }
 
+    /**
+     * Randomly pick malicious Service Requester
+     * */
+    public Set<String> pickMaliciousSR(int numberOfMaliciousNodes)
+    {
+        Set<String> maliciousSRIds = new HashSet<String>();
+
+        Object[] spKeys = serviceRequesterMap.keySet().toArray();
+
+        while(true)
+        {
+            int index = util.pickRandomIndex(spKeys.length);
+
+            maliciousSRIds.add((String) spKeys[index]);
+            if(maliciousSRIds.size() == numberOfMaliciousNodes)
+                break;
+
+        }
+
+        return maliciousSRIds;
     }
 
     /**

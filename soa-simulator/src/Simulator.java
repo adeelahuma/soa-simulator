@@ -30,7 +30,8 @@ import java.util.Set;
          *  Pre-Simulation Step:
          *      *creating SP
          *      *creating SR
-         *      *picking x malicious nodes randomly
+         *      *picking x malicious SP randomly
+         *      #picking y malicious SR randomly
          *  For all SR do following:
          *  Step 1: SR queries SP based on "waitTime" criteria
          *  Step 2: SR picks SR based on highest score
@@ -46,6 +47,9 @@ import java.util.Set;
 
         System.out.println("Tagging Service Providers as malicious...");
         Set<String> maliciousSP = centralHub.pickMaliciousSP(5);
+
+        System.out.println("Tagging Service Requesters as malicious...");
+        Set<String> maliciousSR = centralHub.pickMaliciousSR(5);
 
 
         for(CHServiceRequester serviceRequester :centralHub.serviceRequesterMap.values())
@@ -90,12 +94,12 @@ import java.util.Set;
             else
             {
                 actualWaitTime = servingSP.getWaitTime()-1;
-                feedback =1;
+                feedback = 1;
             }
 
             /**
              * Step-4: If Service requester is trust-worthy log the feedback about service provider
-             * and service requesters
+             * and service requester
              * */
             if(serviceRequester.getTrustScore() >= CentralHub.repScoreThreshold)
             {

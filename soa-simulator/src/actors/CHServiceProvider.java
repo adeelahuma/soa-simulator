@@ -11,6 +11,8 @@ public class CHServiceProvider extends ServiceProvider
     private Double trustScore;
     private Integer actualWaitTimeAverage;
     private List<SPVisitors> spVisitors;
+    private Double alpha = 1.0 ;          //Number of positive feedback
+    private Double beta = 1.0;          //Number of negative feedback
 
     public Double getTrustScore() {
         return trustScore;
@@ -40,5 +42,26 @@ public class CHServiceProvider extends ServiceProvider
 
     public void setSpVisitors(List<SPVisitors> spVisitors) {
         this.spVisitors = spVisitors;
+    }
+
+    public Double getAlpha() {
+        return alpha;
+    }
+
+    public void setAlpha(Double alpha) {
+        this.alpha = alpha;
+    }
+
+    public Double getBeta() {
+        return beta;
+    }
+
+    public void setBeta(Double beta) {
+        this.beta = beta;
+    }
+
+    public Double calculateTrustScore()
+    {
+        return alpha / (alpha+beta);
     }
 }
