@@ -20,9 +20,6 @@ import java.util.Set;
     {
         System.out.println("Starting trust based Simulation...");
 
-        //TODO: Run 100 times for each SR
-
-
         /**
          * Simulation runs for all SR
          *  *SP are restaurants
