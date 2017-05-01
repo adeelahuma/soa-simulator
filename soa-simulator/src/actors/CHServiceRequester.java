@@ -6,6 +6,8 @@ package actors;
 
 public class CHServiceRequester extends ServiceRequester
 {
+    //FIXME: add credibility score
+    //TODO: how to use credibility score ??
     private Double reputationScore;
 
     public CHServiceRequester(String serviceRequesterId, String serviceRequesterName, Double reputationScore) {

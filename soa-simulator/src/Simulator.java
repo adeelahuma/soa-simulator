@@ -67,7 +67,7 @@ import java.util.Set;
                 /**
                  * Picking SP based on highest TS
                  * */
-
+                //FIXME: also consider other SR's logged waittime for SP selection
                 Double tempSpTrustSCore = 0.0;
                 CHServiceProvider pickedSP = null;
                 for(CHServiceProvider sp : serviceProviders)
@@ -135,11 +135,15 @@ import java.util.Set;
                  * If Service requester is trust-worthy log the feedback about service provider
                  * and service requester
                  * */
+                //FIXME: how to calculate credibility score --- number of positive interactions?
+                //FIXME: how to use credibility score  --> use it to calculate weightage... need to discuss this one
+                //FIXME: instead of ignoring SR feedback based on reputation score consider but give less weightage
+                //FIXME: how to calculate weightage??? if feedback is 1 consider 0.7, if feedback is -1 consider -0.7
                 if(serviceRequester.getReputationScore() >= CentralHub.repScoreThreshold)
                 {
                     //log feedback about SP
                     centralHub.logSPFeedBack(feedback, actualWaitTime, servingSP);
-                    //log feedback about SR
+                    //log feedback about other SRs
                     centralHub.logSRFeedBack(feedback, servingSP.getSpVisitors(), actualWaitTime);
                 }
 

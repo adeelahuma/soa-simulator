@@ -215,7 +215,7 @@ public class CentralHub
      * Increment or decrement reputation rating
      * */
     public void updateSRTrustScore(int rating, CHServiceRequester sr)
-    {
+    {//FIXME: implement it like alpha beta score
         Double tempRepScore = sr.getReputationScore()+rating;
 
         sr.setReputationScore(normalizeRepScore(tempRepScore));
