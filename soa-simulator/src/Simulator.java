@@ -2,11 +2,8 @@ import actors.CHServiceProvider;
 import actors.CHServiceRequester;
 import actors.CentralHub;
 import actors.SPVisitors;
+import util.Utility;
 
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -16,6 +13,8 @@ import java.util.Set;
  public class Simulator
 {
     private static CentralHub centralHub = new CentralHub();
+    private static Utility util = new Utility();
+
     public static void main(String[] args)
     {
         System.out.println("Starting trust based Simulation...");
@@ -73,8 +72,8 @@ import java.util.Set;
                  * Picking SP based on highest TS
                  * */
 
-                //CHServiceProvider servingSP = GetBestServiceProvider_NoTrust();
-                CHServiceProvider servingSP = GetBestServiceProvider_WithSPTrustOnly();
+                CHServiceProvider servingSP = GetBestServiceProvider_NoTrust();
+                //CHServiceProvider servingSP = GetBestServiceProvider_WithSPTrustOnly();
                 //CHServiceProvider servingSP = GetBestServiceProvider_WithSPTrustAndWTClaims();
 
                 if(servingSP.getIsMalicious())
@@ -165,48 +164,8 @@ import java.util.Set;
         }
 
         //simulation code
-
-        ///spit out to file for graphs
-        String writeFileName_M = "./trust_score_M.csv";
-        String writeFileName_NM = "./trust_score_NM.csv";
-
-        try
-        {
-
-            FileWriter fWriter = null;
-            BufferedWriter writer = null;
-
-            ///write file for Malicious node
-            fWriter = new FileWriter(writeFileName_M);
-            writer = new BufferedWriter(fWriter);
-
-            writer.write("time_index,TS");
-            writer.newLine();
-
-            writer.write(sb_m.toString());
-            writer.close();
-            ////
-
-            ///write file for Non- Malicious node
-            fWriter = new FileWriter(writeFileName_NM);
-            writer = new BufferedWriter(fWriter);
-
-            writer.write("time_index,TS");
-            writer.newLine();
-
-            writer.write(sb_nm.toString());
-            writer.close();
-            ////
-
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        ///
+        //spit out data for graphs
+        util.logOutputForGraph(sb_m, sb_nm);
 
 
         for(CHServiceRequester sr : centralHub.serviceRequesterMap.values()){
