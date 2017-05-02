@@ -4,7 +4,6 @@ import actors.CentralHub;
 import actors.SPVisitors;
 import util.Utility;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -14,8 +13,6 @@ import java.util.Set;
  public class Simulator
 {
     private static CentralHub centralHub = new CentralHub();
-    private static Utility util = new Utility();
-
     public static void main(String[] args)
     {
         System.out.println("Starting trust based Simulation...");
@@ -53,52 +50,43 @@ import java.util.Set;
         /**
          * Run Simulation x times
          * */
-        for(int i = 0; i < 10 ; i++)
+        for(int i = 0; i < 2 ; i++)
         {
             for(CHServiceRequester serviceRequester :centralHub.serviceRequesterMap.values())
             {
 
-                Integer requestedWaitTime = util.pickRandomWaitTime();
+                //Integer requestedWaitTime = util.pickRandomWaitTime();
                 /**
                  * Query central hub service providers with a waitTime=x
                  * */
-                List<CHServiceProvider> serviceProviders =  centralHub.queryServiceProvider(requestedWaitTime);
+                //List<CHServiceProvider> serviceProviders =  centralHub.queryServiceProvider(requestedWaitTime);
 
                 /**
                  * Picking SP based on highest TS
                  * */
-                //FIXME: also consider other SR's logged waittime for SP selection
-                Double tempSpTrustSCore = 0.0;
-                CHServiceProvider pickedSP = null;
-                for(CHServiceProvider sp : serviceProviders)
-                {
-                    if(sp.getTrustScore()> tempSpTrustSCore)
-                    {
-                        tempSpTrustSCore = sp.getTrustScore();
-                        pickedSP = sp;
-
-                    }
-                }
-                CHServiceProvider servingSP = pickedSP;
+                
+                //CHServiceProvider servingSP = GetBestServiceProvider_NoTrust();
+                CHServiceProvider servingSP = GetBestServiceProvider_WithSPTrustOnly();
+                //CHServiceProvider servingSP = GetBestServiceProvider_WithSPTrustAndWTClaims();
 
                 //Picking SP randomly
-            /*int spIndex = util.pickRandomIndex(serviceProviders.size());
-            CHServiceProvider servingSP = serviceProviders.get(spIndex);*/
+	            /*int spIndex = util.pickRandomIndex(serviceProviders.size());
+	            CHServiceProvider servingSP = serviceProviders.get(spIndex);*/
 
 
                 /**
                  * fake waitTime for malicious node
                  * */
-                Integer actualWaitTime = 0;
+                Double actualWaitTime = 0.00;
                 int feedback = 0;
                 if(maliciousSP.contains(servingSP.getId())) //serving SP is malicious
                 {
-                    actualWaitTime = servingSP.getWaitTime()+ 10;
+                    actualWaitTime = servingSP.getActualWaitTime();
                     feedback= -1;
                 }
                 else
                 {
-                    actualWaitTime = servingSP.getWaitTime();//- 1;
+                    actualWaitTime = servingSP.getActualWaitTime();//- 1;
                     feedback = 1;
                 }
 
@@ -110,12 +98,12 @@ import java.util.Set;
                     if(feedback == 1)
                     {
                         servingSP.setBeta(servingSP.getBeta()+ 1); // increment negative interaction
-                        actualWaitTime = servingSP.getWaitTime()+ 10;
+                        actualWaitTime = servingSP.getActualWaitTime()+ 10;
                     }
                     else
                     {
                         servingSP.setAlpha(servingSP.getAlpha() + 1); // increment positive interaction
-                        actualWaitTime = servingSP.getWaitTime();
+                        actualWaitTime = servingSP.getActualWaitTime();
                     }
 
                 }
@@ -135,24 +123,128 @@ import java.util.Set;
                  * If Service requester is trust-worthy log the feedback about service provider
                  * and service requester
                  * */
-                //FIXME: how to calculate credibility score --- number of positive interactions?
-                //FIXME: how to use credibility score  --> use it to calculate weightage... need to discuss this one
-                //FIXME: instead of ignoring SR feedback based on reputation score consider but give less weightage
-                //FIXME: how to calculate weightage??? if feedback is 1 consider 0.7, if feedback is -1 consider -0.7
                 if(serviceRequester.getReputationScore() >= CentralHub.repScoreThreshold)
                 {
                     //log feedback about SP
                     centralHub.logSPFeedBack(feedback, actualWaitTime, servingSP);
-                    //log feedback about other SRs
+                    //log feedback about SR
                     centralHub.logSRFeedBack(feedback, servingSP.getSpVisitors(), actualWaitTime);
                 }
 
-                servingSP.getSpVisitors().add(new SPVisitors(serviceRequester.getId(), actualWaitTime));
+                servingSP.getSpVisitors().add(new SPVisitors(serviceRequester.getId(), actualWaitTime, servingSP.getAdvertisedWaitTime(), serviceRequester.getIsMalicious(), serviceRequester.getFeedbacks()));
             }
         }
 
+        for(CHServiceRequester sr : centralHub.serviceRequesterMap.values()){
+        	int totalPositiveFB = 0;
+        	for(Boolean fb : sr.getFeedbacks()){
+        		if(fb) totalPositiveFB++;
+        	}
+        	System.out.println("SR Name: " + sr.getServiceRequesterName() + ", Is Malicious: " + sr.getIsMalicious() + ", Total Feedbacks: " + sr.getFeedbacks().size()
+        						+ ", Reputation Score: " + ((sr.getFeedbacks() != null && sr.getFeedbacks().size() > 0)? totalPositiveFB/sr.getFeedbacks().size() : 0));
+        }
+        for(CHServiceProvider sp : centralHub.serviceProviderMap.values()){
+        	System.out.println("SP Name:" + sp.getServiceProviderName() + ", Is Malicious:" + sp.getIsMalicious()
+        						+ ", Trust Score: " + sp.getTrustScore() + ", Wait Time: " + sp.getActualWaitTime());
+        	for(SPVisitors spv : sp.getSpVisitors()){
+        		System.out.println("\t\tSR Id: " +spv.getSRId() + ", is Malicious: " + spv.getIsMalicious() + ", Wait Time:" + spv.getWaitTimeLogged() 
+        							+ ", Advertised Wait Time: " + spv.getAdvertisedWaitTime());
+        	}
+        }
          System.out.println("Ending trust based Simulation...");
 
     }
-
+    
+    private static CHServiceProvider GetBestServiceProvider_NoTrust(){
+    	CHServiceProvider selectedSP = null;
+        Double tempLeastWaitTime = - 1.00;
+    	for(CHServiceProvider sp : centralHub.serviceProviderMap.values()){
+    		
+    		if(sp.getAdvertisedWaitTime() < tempLeastWaitTime || tempLeastWaitTime == -1.00){
+    			tempLeastWaitTime = sp.getAdvertisedWaitTime();
+    			selectedSP = sp;
+    		}    	
+    	}
+    	return selectedSP;
+    	
+    }
+    
+    private static CHServiceProvider GetBestServiceProvider_WithSPTrustOnly(){
+    	CHServiceProvider selectedSP = null;
+    	double tempSpWaitTimeCalculated = -1.00;        
+    	for(CHServiceProvider sp : centralHub.serviceProviderMap.values()){
+        	double waitTimeWeight = 0.00;
+        	double avgWeightedClaimedTime = 0.00;
+        	//double actualWaitTime = sp.getActualWaitTime();
+        	//double advertisedWaitTime = sp.getAdvertisedWaitTime();
+        	//double trustScore = sp.getTrustScore();
+        	double waitTimeTS = sp.getAdvertisedWaitTime() * (2.0 - sp.getTrustScore());
+        	
+            if(waitTimeTS < tempSpWaitTimeCalculated || tempSpWaitTimeCalculated == -1.00)
+            {
+            	tempSpWaitTimeCalculated = waitTimeTS;
+                selectedSP = sp;
+            }
+    		   	
+    	}
+    	return selectedSP;    	
+    }
+    
+    private static CHServiceProvider GetBestServiceProvider_WithSPTrustAndWTClaims(){
+    	CHServiceProvider selectedSP = null;
+    	Double tempSpWaitTimeCalculated = -1.00;        
+    	for(CHServiceProvider sp : centralHub.serviceProviderMap.values()){
+        	double waitTimeWeight = 0.00;
+        	double avgWeightedClaimedTime = 0.00;
+        	if(sp.getSpVisitors().size() > 0){
+        		//This is not the best way to do because sp.GetSpVisitors() will be iterated twice
+        		//but I don't know a better way :(
+        		
+        		//First get total weighted reputation score for all WTs
+        		double totalWeightedReputation = 0.0;
+        		int totalCredibility = 0;
+        		for(SPVisitors spv : sp.getSpVisitors()){
+        			totalCredibility += spv.getFeedbacks().size();
+        			if(spv.getFeedbacks().size() < 1)
+        				totalCredibility += 1;
+        			//determine total positive feedbacks towards the SR
+        			int totalPositiveFb = 0; 
+        			for(Boolean fb : spv.getFeedbacks()){
+        				if (fb)
+        					totalPositiveFb++;
+        			}
+        			int totalFeedbacks = 1;//if there are no feedbacks for this WT then consider it same as 1
+        			if(spv.getFeedbacks().size() > 0){
+        				totalFeedbacks = spv.getFeedbacks().size();
+        			}
+        			//determine reputation rating of this WT as beta reputation score (
+        			double repRating = (double) totalPositiveFb / (double) totalFeedbacks;
+        			totalWeightedReputation += (spv.getFeedbacks().size() < 1 ? 1 : spv.getFeedbacks().size()) * repRating;
+        		}
+        		//Next determine the weighted sum of WT claimed wait times
+        		double totalWeightedClaimedTime = 0.00;
+        		for(SPVisitors spv : sp.getSpVisitors()){
+        			double test = spv.getWaitTimeLogged();
+        			totalWeightedClaimedTime += spv.getWaitTimeLogged() * (spv.getFeedbacks().size() < 1 ? 1: spv.getFeedbacks().size()) / totalWeightedReputation;
+        		}
+        		
+        		avgWeightedClaimedTime = totalWeightedClaimedTime / sp.getSpVisitors().size();
+        		
+        		waitTimeWeight = 0.5 * totalWeightedReputation/(sp.getSpVisitors().size() * totalCredibility);
+        	}
+        	//double actualWaitTime = sp.getActualWaitTime();
+        	//double advertisedWaitTime = sp.getAdvertisedWaitTime();
+        	//double trustScore = sp.getTrustScore();
+        	double waitTimeTS = sp.getAdvertisedWaitTime() * (2.0 - sp.getTrustScore());
+        	
+        	double waitTimeCalculated = ((1- waitTimeWeight) * waitTimeTS) + (waitTimeWeight * avgWeightedClaimedTime);
+        	
+            if(waitTimeCalculated < tempSpWaitTimeCalculated || tempSpWaitTimeCalculated == -1.00)
+            {
+            	tempSpWaitTimeCalculated = waitTimeCalculated;
+                selectedSP = sp;
+            }    		   	
+    	}
+    	return selectedSP;    	
+    }
 }

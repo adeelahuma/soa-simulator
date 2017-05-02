@@ -7,9 +7,9 @@ public class ServiceProvider
 {
     private String id;
     private String serviceProviderName;
-    private Integer waitTime;
+    private Double waitTime;
 
-    public ServiceProvider(String id, String name, Integer waitTime)
+    public ServiceProvider(String id, String name, Double waitTime)
     {
         this.id = id;
         this.serviceProviderName = name;
@@ -35,11 +35,11 @@ public class ServiceProvider
         this.serviceProviderName = serviceProviderName;
     }
 
-    public Integer getWaitTime() {
+    public Double getWaitTime() {
         return waitTime;
     }
 
-    public void setWaitTime(Integer waitTime) {
+    public void setWaitTime(Double waitTime) {
         this.waitTime = waitTime;
     }
 }
