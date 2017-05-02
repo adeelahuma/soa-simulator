@@ -34,16 +34,16 @@ public class CentralHub
      * */
     public void createServiceProviders()
     {
-        CHServiceProvider sp1 = new CHServiceProvider(util.getId(), "BurgerKing", 5,initialTrustScore, null);
-        CHServiceProvider sp2 = new CHServiceProvider(util.getId(), "Burger7", 5, initialTrustScore, null);
-        CHServiceProvider sp3 = new CHServiceProvider(util.getId(), "Burger21", 10, initialTrustScore, null);
-        CHServiceProvider sp4 = new CHServiceProvider(util.getId(), "KFC", 10, initialTrustScore, null);
-        CHServiceProvider sp5 = new CHServiceProvider(util.getId(), "Chick-fill-A", 10, initialTrustScore, null);
-        CHServiceProvider sp6 = new CHServiceProvider(util.getId(), "Panera", 5, initialTrustScore, null);
-        CHServiceProvider sp7 = new CHServiceProvider(util.getId(), "Sweetgreen", 5, initialTrustScore, null);
-        CHServiceProvider sp8 = new CHServiceProvider(util.getId(), "BasilLeaf", 10, initialTrustScore, null);
-        CHServiceProvider sp9 = new CHServiceProvider(util.getId(), "Busara", 5, initialTrustScore, null);
-        CHServiceProvider sp10 = new CHServiceProvider(util.getId(), "MidTown Kabob", 5, initialTrustScore, null);
+        CHServiceProvider sp1 = new CHServiceProvider(util.getId(), "BurgerKing", 5.00,initialTrustScore, null);
+        CHServiceProvider sp2 = new CHServiceProvider(util.getId(), "Burger7", 5.00, initialTrustScore, null);
+        CHServiceProvider sp3 = new CHServiceProvider(util.getId(), "Burger21", 10.00, initialTrustScore, null);
+        CHServiceProvider sp4 = new CHServiceProvider(util.getId(), "KFC", 10.00, initialTrustScore, null);
+        CHServiceProvider sp5 = new CHServiceProvider(util.getId(), "Chick-fill-A", 10.00, initialTrustScore, null);
+        CHServiceProvider sp6 = new CHServiceProvider(util.getId(), "Panera", 5.00, initialTrustScore, null);
+        CHServiceProvider sp7 = new CHServiceProvider(util.getId(), "Sweetgreen", 5.00, initialTrustScore, null);
+        CHServiceProvider sp8 = new CHServiceProvider(util.getId(), "BasilLeaf", 10.00, initialTrustScore, null);
+        CHServiceProvider sp9 = new CHServiceProvider(util.getId(), "Busara", 5.00, initialTrustScore, null);
+        CHServiceProvider sp10 = new CHServiceProvider(util.getId(), "MidTown Kabob", 5.00, initialTrustScore, null);
 
         serviceProviderMap.put(sp1.getId(), sp1);
         serviceProviderMap.put(sp2.getId(), sp2);
@@ -135,8 +135,10 @@ public class CentralHub
         while(true)
         {
             int index = util.pickRandomIndex(spKeys.length);
-
-            maliciousSPIds.add((String) spKeys[index]);
+            if(!maliciousSPIds.contains((String) spKeys[index])){
+            	maliciousSPIds.add((String) spKeys[index]);
+            	serviceProviderMap.get((String)spKeys[index]).setIsMalicious(true);
+            }
             if(maliciousSPIds.size() == numberOfMaliciousNodes)
                 break;
 
@@ -152,17 +154,20 @@ public class CentralHub
     {
         Set<String> maliciousSRIds = new HashSet<String>();
 
-        Object[] spKeys = serviceRequesterMap.keySet().toArray();
+        /*Object[] spKeys = serviceRequesterMap.keySet().toArray();
 
         while(true)
         {
             int index = util.pickRandomIndex(spKeys.length);
 
-            maliciousSRIds.add((String) spKeys[index]);
+            if(!maliciousSRIds.contains((String)spKeys[index])){
+            	maliciousSRIds.add((String) spKeys[index]);
+            	serviceRequesterMap.get(spKeys[index]).setIsMalicious(true);
+            }
             if(maliciousSRIds.size() == numberOfMaliciousNodes)
                 break;
 
-        }
+        }*/
 
         return maliciousSRIds;
     }
@@ -187,7 +192,7 @@ public class CentralHub
     /**
      * Service requester gives feedback about service providers  (+1= positive, -1= negative)
      * */
-    public void logSPFeedBack(int rating, Integer actualWaitTime, CHServiceProvider serviceProvider)
+    public void logSPFeedBack(int rating, Double actualWaitTime, CHServiceProvider serviceProvider)
     {
         serviceProvider.calculateTrustScore();
         serviceProvider.setActualWaitTimeAverage((actualWaitTime+serviceProvider.getWaitTime())/2);
@@ -196,7 +201,7 @@ public class CentralHub
     /**
      *
      * */
-    public void logSRFeedBack(int rating, List<SPVisitors> spVisitors, int actualWaitTime)
+    public void logSRFeedBack(int rating, List<SPVisitors> spVisitors, Double actualWaitTime)
     {
         for(SPVisitors sp : spVisitors)
         {
@@ -218,7 +223,9 @@ public class CentralHub
     {
         Double tempRepScore = sr.getReputationScore()+rating;
 
-        sr.setReputationScore(normalizeRepScore(tempRepScore));
+        sr.setReputationScore(normalizeRepScore(tempRepScore));        
+
+        sr.getFeedbacks().add((rating == 1) ? true : false);
     }
 
     /**

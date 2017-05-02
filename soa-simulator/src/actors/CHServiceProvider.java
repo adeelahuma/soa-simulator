@@ -10,10 +10,11 @@ import java.util.List;
 public class CHServiceProvider extends ServiceProvider
 {
     private Double trustScore;
-    private Integer actualWaitTimeAverage;
+    private Double actualWaitTimeAverage;
     private List<SPVisitors> spVisitors = new ArrayList<SPVisitors>();
     private Double alpha = 1.0 ;          //Number of positive feedback
     private Double beta = 1.0;          //Number of negative feedback
+    private Boolean isMalicious = false;
 
     public Double getTrustScore() {
         return trustScore;
@@ -22,16 +23,30 @@ public class CHServiceProvider extends ServiceProvider
     public void setTrustScore(Double trustScore) {
         this.trustScore = trustScore;
     }
+    
+    public Double getAdvertisedWaitTime(){
+    	if(isMalicious)
+    		return getActualWaitTime()/2.00;
+    	else 
+    		return getActualWaitTime();
+    }
+    
+    public Double getActualWaitTime(){    	
+    	if(spVisitors.size() < 3)
+    		return 0.00;
+    	else
+    		return (spVisitors.size()/3.00) * 5.00;
+    }
 
-    public Integer getActualWaitTimeAverage() {
+    public Double getActualWaitTimeAverage() {
         return actualWaitTimeAverage;
     }
 
-    public void setActualWaitTimeAverage(Integer actualWaitTimeAverage) {
+    public void setActualWaitTimeAverage(Double actualWaitTimeAverage) {
         this.actualWaitTimeAverage = actualWaitTimeAverage;
     }
 
-    public CHServiceProvider(String id, String name, Integer waitTime, Double trustScore, Integer actualWaitTimeAverage) {
+    public CHServiceProvider(String id, String name, Double waitTime, Double trustScore, Double actualWaitTimeAverage) {
         super(id, name, waitTime);
         this.trustScore = trustScore;
         this.actualWaitTimeAverage = actualWaitTimeAverage;
@@ -63,7 +78,15 @@ public class CHServiceProvider extends ServiceProvider
 
     public Double calculateTrustScore()
     {
-        this.trustScore = alpha / (alpha+beta);;
+        this.trustScore = alpha / (alpha+beta);
         return trustScore;
+    }
+    
+    public Boolean getIsMalicious(){
+    	return isMalicious;
+    }
+    
+    public void setIsMalicious(Boolean isMal){
+    	isMalicious = isMal;
     }
 }
