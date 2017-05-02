@@ -26,12 +26,12 @@ public class CHServiceProvider extends ServiceProvider
     
     public Double getAdvertisedWaitTime(){
     	if(isMalicious)
-    		return getActualWaitTime()/2.00;
+    		return getColludedWaitTimeBasedOnUsers()/2.00;
     	else 
-    		return getActualWaitTime();
+    		return getColludedWaitTimeBasedOnUsers();
     }
     
-    public Double getActualWaitTime(){    	
+    public Double getColludedWaitTimeBasedOnUsers(){
     	if(spVisitors.size() < 3)
     		return 0.00;
     	else
@@ -91,4 +91,6 @@ public class CHServiceProvider extends ServiceProvider
     public void setIsMalicious(Boolean isMal){
     	isMalicious = isMal;
     }
+
+
 }
