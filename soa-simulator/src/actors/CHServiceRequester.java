@@ -6,9 +6,10 @@ package actors;
 
 public class CHServiceRequester extends ServiceRequester
 {
-    //FIXME: add credibility score
-    //TODO: how to use credibility score ??
     private Double reputationScore;
+    private Double alpha = 1.0 ;          //Number of positive feedback
+    private Double beta = 1.0;          //Number of negative feedback
+    private Double credibilityScore = 0.0;
 
     public CHServiceRequester(String serviceRequesterId, String serviceRequesterName, Double reputationScore) {
         super(serviceRequesterId, serviceRequesterName);
@@ -21,5 +22,30 @@ public class CHServiceRequester extends ServiceRequester
 
     public void setReputationScore(Double reputationScore) {
         this.reputationScore = reputationScore;
+    }
+
+
+    public Double getBeta() {
+        return beta;
+    }
+
+    public void setBeta(Double beta) {
+        this.beta = beta;
+    }
+
+    public Double getAlpha() {
+        return alpha;
+    }
+
+    public void setAlpha(Double alpha) {
+        this.alpha = alpha;
+    }
+
+    public Double getCredibilityScore() {
+        return credibilityScore;
+    }
+
+    public void setCredibilityScore(Double credibilityScore) {
+        this.credibilityScore = credibilityScore;
     }
 }

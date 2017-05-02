@@ -34,26 +34,26 @@ public class CentralHub
      * */
     public void createServiceProviders()
     {
-        CHServiceProvider sp1 = new CHServiceProvider(util.getId(), "BurgerKing", 5.00,initialTrustScore, null);
-        CHServiceProvider sp2 = new CHServiceProvider(util.getId(), "Burger7", 5.00, initialTrustScore, null);
-        CHServiceProvider sp3 = new CHServiceProvider(util.getId(), "Burger21", 10.00, initialTrustScore, null);
-        CHServiceProvider sp4 = new CHServiceProvider(util.getId(), "KFC", 10.00, initialTrustScore, null);
-        CHServiceProvider sp5 = new CHServiceProvider(util.getId(), "Chick-fill-A", 10.00, initialTrustScore, null);
-        CHServiceProvider sp6 = new CHServiceProvider(util.getId(), "Panera", 5.00, initialTrustScore, null);
-        CHServiceProvider sp7 = new CHServiceProvider(util.getId(), "Sweetgreen", 5.00, initialTrustScore, null);
-        CHServiceProvider sp8 = new CHServiceProvider(util.getId(), "BasilLeaf", 10.00, initialTrustScore, null);
-        CHServiceProvider sp9 = new CHServiceProvider(util.getId(), "Busara", 5.00, initialTrustScore, null);
-        CHServiceProvider sp10 = new CHServiceProvider(util.getId(), "MidTown Kabob", 5.00, initialTrustScore, null);
+        CHServiceProvider sp1 = new CHServiceProvider(util.getId(), "BurgerKing", 5.00,initialTrustScore, null, true);
+        /*CHServiceProvider sp2 = new CHServiceProvider(util.getId(), "Burger7", 5.00, initialTrustScore, null, true);
+        CHServiceProvider sp3 = new CHServiceProvider(util.getId(), "Burger21", 10.00, initialTrustScore, null, true);
+        CHServiceProvider sp4 = new CHServiceProvider(util.getId(), "KFC", 10.00, initialTrustScore, null, true);
+        CHServiceProvider sp5 = new CHServiceProvider(util.getId(), "Chick-fill-A", 10.00, initialTrustScore, null, true);
+        CHServiceProvider sp6 = new CHServiceProvider(util.getId(), "Panera", 5.00, initialTrustScore, null, false);
+        CHServiceProvider sp7 = new CHServiceProvider(util.getId(), "Sweetgreen", 5.00, initialTrustScore, null, false);
+        CHServiceProvider sp8 = new CHServiceProvider(util.getId(), "BasilLeaf", 10.00, initialTrustScore, null, false);
+        CHServiceProvider sp9 = new CHServiceProvider(util.getId(), "Busara", 5.00, initialTrustScore, null, false);*/
+        CHServiceProvider sp10 = new CHServiceProvider(util.getId(), "MidTown Kabob", 5.00, initialTrustScore, null, false);
 
         serviceProviderMap.put(sp1.getId(), sp1);
-        serviceProviderMap.put(sp2.getId(), sp2);
+        /*serviceProviderMap.put(sp2.getId(), sp2);
         serviceProviderMap.put(sp3.getId(), sp3);
         serviceProviderMap.put(sp4.getId(), sp4);
         serviceProviderMap.put(sp5.getId(), sp5);
         serviceProviderMap.put(sp6.getId(), sp6);
         serviceProviderMap.put(sp7.getId(), sp7);
         serviceProviderMap.put(sp8.getId(), sp8);
-        serviceProviderMap.put(sp9.getId(), sp9);
+        serviceProviderMap.put(sp9.getId(), sp9);*/
         serviceProviderMap.put(sp10.getId(), sp10);
     }
 
@@ -148,6 +148,24 @@ public class CentralHub
     }
 
     /**
+     * Pick the ones that are tagged as malicious by system
+     * */
+    public Set<String> pickSpecifiedMaliciousSP()
+    {
+        Set<String> maliciousSPIds = new HashSet<String>();
+
+        for(CHServiceProvider sp : serviceProviderMap.values())
+        {
+            if(sp.getIsMalicious())
+            {
+                maliciousSPIds.add(sp.getId());
+            }
+        }
+
+        return maliciousSPIds;
+    }
+
+    /**
      * Randomly pick malicious Service Requester
      * */
     public Set<String> pickMaliciousSR(int numberOfMaliciousNodes)
@@ -205,12 +223,16 @@ public class CentralHub
     {
         for(SPVisitors sp : spVisitors)
         {
-            if((sp.getWaitTimeLogged() - actualWaitTime) < waitTimeThreshold ) //trustworthy
+            CHServiceRequester sr = serviceRequesterMap.get(sp.getSRId());
+
+            if((sp.getWaitTimeLogged() - actualWaitTime) < waitTimeThreshold ) //trustworthy, positive interaction
             {
+                sr.setAlpha(sr.getAlpha()+1);
                 updateSRTrustScore(1,serviceRequesterMap.get(sp.getSRId()));
             }
-            else
+            else //not trustworthy, negative interaction
             {
+                sr.setBeta(sr.getBeta()+1);
                 updateSRTrustScore(-1,serviceRequesterMap.get(sp.getSRId()));
             }
         }
@@ -220,10 +242,12 @@ public class CentralHub
      * Increment or decrement reputation rating
      * */
     public void updateSRTrustScore(int rating, CHServiceRequester sr)
-    {//FIXME: implement it like alpha beta score
-        Double tempRepScore = sr.getReputationScore()+rating;
+    {
+        // reputation score set based on beta reputation
+        sr.setReputationScore(sr.getAlpha() / (sr.getAlpha()+sr.getBeta()));
+        //Double tempRepScore = sr.getReputationScore()+rating;
 
-        sr.setReputationScore(normalizeRepScore(tempRepScore));        
+        //sr.setReputationScore(normalizeRepScore(tempRepScore));
 
         sr.getFeedbacks().add((rating == 1) ? true : false);
     }

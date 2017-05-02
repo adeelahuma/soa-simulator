@@ -2,8 +2,11 @@ import actors.CHServiceProvider;
 import actors.CHServiceRequester;
 import actors.CentralHub;
 import actors.SPVisitors;
-import util.Utility;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -42,7 +45,8 @@ import java.util.Set;
         centralHub.createServiceRequesters();
 
         System.out.println("Tagging Service Providers as malicious...");
-        Set<String> maliciousSP = centralHub.pickMaliciousSP(5);
+        //Set<String> maliciousSP = centralHub.pickMaliciousSP(5);
+        Set<String> maliciousSP = centralHub.pickSpecifiedMaliciousSP();
 
         System.out.println("Tagging Service Requesters as malicious...");
         Set<String> maliciousSR = centralHub.pickMaliciousSR(5);
@@ -50,11 +54,15 @@ import java.util.Set;
         /**
          * Run Simulation x times
          * */
+        int k = -1; //timeIndex for graph
+        StringBuffer sb_m = new StringBuffer();
+        StringBuffer sb_nm = new StringBuffer();
+
         for(int i = 0; i < 2 ; i++)
         {
             for(CHServiceRequester serviceRequester :centralHub.serviceRequesterMap.values())
             {
-
+                k++;
                 //Integer requestedWaitTime = util.pickRandomWaitTime();
                 /**
                  * Query central hub service providers with a waitTime=x
@@ -64,10 +72,27 @@ import java.util.Set;
                 /**
                  * Picking SP based on highest TS
                  * */
-                
+
                 //CHServiceProvider servingSP = GetBestServiceProvider_NoTrust();
                 CHServiceProvider servingSP = GetBestServiceProvider_WithSPTrustOnly();
                 //CHServiceProvider servingSP = GetBestServiceProvider_WithSPTrustAndWTClaims();
+
+                if(servingSP.getIsMalicious())
+                {
+                    sb_m.append(k).append(",")
+                            .append(servingSP.getTrustScore())
+                            .append("\n");
+                }
+                else
+                {
+                    sb_nm.append(k).append(",")
+                            .append(servingSP.getTrustScore())
+                            .append("\n");
+                }
+
+
+                System.out.println(k + "," + servingSP.getTrustScore()+ ", "+  servingSP.getServiceProviderName());
+
 
                 //Picking SP randomly
 	            /*int spIndex = util.pickRandomIndex(serviceProviders.size());
@@ -123,6 +148,10 @@ import java.util.Set;
                  * If Service requester is trust-worthy log the feedback about service provider
                  * and service requester
                  * */
+                //FIXME: how to calculate credibility score --- number of positive interactions?
+                //FIXME: how to use credibility score  --> use it to calculate weightage... need to discuss this one
+                //FIXME: instead of ignoring SR feedback based on reputation score consider but give less weightage
+                //FIXME: how to calculate weightage??? if feedback is 1 consider 0.7, if feedback is -1 consider -0.7
                 if(serviceRequester.getReputationScore() >= CentralHub.repScoreThreshold)
                 {
                     //log feedback about SP
@@ -134,6 +163,51 @@ import java.util.Set;
                 servingSP.getSpVisitors().add(new SPVisitors(serviceRequester.getId(), actualWaitTime, servingSP.getAdvertisedWaitTime(), serviceRequester.getIsMalicious(), serviceRequester.getFeedbacks()));
             }
         }
+
+        //simulation code
+
+        ///spit out to file for graphs
+        String writeFileName_M = "./trust_score_M.csv";
+        String writeFileName_NM = "./trust_score_NM.csv";
+
+        try
+        {
+
+            FileWriter fWriter = null;
+            BufferedWriter writer = null;
+
+            ///write file for Malicious node
+            fWriter = new FileWriter(writeFileName_M);
+            writer = new BufferedWriter(fWriter);
+
+            writer.write("time_index,TS");
+            writer.newLine();
+
+            writer.write(sb_m.toString());
+            writer.close();
+            ////
+
+            ///write file for Non- Malicious node
+            fWriter = new FileWriter(writeFileName_NM);
+            writer = new BufferedWriter(fWriter);
+
+            writer.write("time_index,TS");
+            writer.newLine();
+
+            writer.write(sb_nm.toString());
+            writer.close();
+            ////
+
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        ///
+
 
         for(CHServiceRequester sr : centralHub.serviceRequesterMap.values()){
         	int totalPositiveFB = 0;

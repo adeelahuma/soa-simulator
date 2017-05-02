@@ -46,10 +46,12 @@ public class CHServiceProvider extends ServiceProvider
         this.actualWaitTimeAverage = actualWaitTimeAverage;
     }
 
-    public CHServiceProvider(String id, String name, Double waitTime, Double trustScore, Double actualWaitTimeAverage) {
+    public CHServiceProvider(String id, String name, Double waitTime, Double trustScore,
+                             Double actualWaitTimeAverage, boolean isMali) {
         super(id, name, waitTime);
         this.trustScore = trustScore;
         this.actualWaitTimeAverage = actualWaitTimeAverage;
+        this.isMalicious = isMali;
     }
 
     public List<SPVisitors> getSpVisitors() {
